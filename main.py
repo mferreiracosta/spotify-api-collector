@@ -3,8 +3,6 @@ from pathlib import Path
 import os
 import requests
 
-import base64
-
 
 dotenv_path = Path.cwd() / ".env"
 load_dotenv(dotenv_path=dotenv_path)
