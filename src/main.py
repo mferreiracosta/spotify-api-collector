@@ -1,15 +1,15 @@
 """Módulo responsável pela centralização dos códigos de todo projeto."""
 
-
+import base64
 import json
-from dotenv import load_dotenv
-from pathlib import Path
 import os
+from pathlib import Path
+
 import pandas as pd
 import requests
+from dotenv import load_dotenv
 
-import base64
-
+from to_landing.pipeline import Spotify2Landing
 
 dotenv_path = Path.cwd() / ".env"
 load_dotenv(dotenv_path=dotenv_path)
@@ -17,17 +17,18 @@ load_dotenv(dotenv_path=dotenv_path)
 CLIENT_ID = os.environ.get("CLIENT_ID")
 CLIENT_SECRET = os.environ.get("CLIENT_SECRET")
 
+
 def get_token():
     auth_string = CLIENT_ID + ":" + CLIENT_SECRET
     auth_bytes = auth_string.encode("utf-8")
     auth_base64 = str(base64.b64encode(auth_bytes), "utf-8")
 
-    url = 'https://accounts.spotify.com/api/token'
+    url = "https://accounts.spotify.com/api/token"
     headers = {
         "Authorization": f"Basic {auth_base64}",
         "Content-Type": "application/x-www-form-urlencoded",
     }
-    data = {"grant_type": 'client_credentials'}
+    data = {"grant_type": "client_credentials"}
 
     response = requests.post(url=url, headers=headers, data=data)
 
@@ -35,11 +36,13 @@ def get_token():
 
     return token
 
+
 def get_auth_header(token):
     return {"Authorization": f"Bearer {token}"}
 
+
 def search_for_item(token, item, limit):
-    
+
     headers = get_auth_header(token)
 
     url = "https://api.spotify.com/v1/search"
@@ -64,13 +67,15 @@ def search_for_item(token, item, limit):
 
     # return all_results
 
+
 def get_artists_by_artist_id(token, artist_id):
     url = f"https://api.spotify.com/v1/artists/{artist_id}"
     headers = get_auth_header(token)
 
     response = requests.get(url, headers=headers)
 
-    return response.json()  #["tracks"]
+    return response.json()  # ["tracks"]
+
 
 def get_albums_by_artist_id(token, artist_id):
     url = f"https://api.spotify.com/v1/artists/{artist_id}/albums"
@@ -78,7 +83,8 @@ def get_albums_by_artist_id(token, artist_id):
 
     response = requests.get(url, headers=headers)
 
-    return response.json()  #["tracks"]
+    return response.json()  # ["tracks"]
+
 
 def get_album_tracks_by_album_id(token, album_id):
     url = f"https://api.spotify.com/v1/albums/{album_id}/tracks"
@@ -86,7 +92,8 @@ def get_album_tracks_by_album_id(token, album_id):
 
     response = requests.get(url, headers=headers)
 
-    return response.json()  #["tracks"]
+    return response.json()  # ["tracks"]
+
 
 def get_songs_by_artist_id(token, artist_id):
     url = f"https://api.spotify.com/v1/artists/{artist_id}/top-tracks"
@@ -94,7 +101,8 @@ def get_songs_by_artist_id(token, artist_id):
 
     response = requests.get(url, headers=headers)
 
-    return response.json()  #["tracks"]
+    return response.json()  # ["tracks"]
+
 
 def get_related_artists_by_artist_id(token, artist_id):
     url = f"https://api.spotify.com/v1/artists/{artist_id}/related-artists"
@@ -102,44 +110,49 @@ def get_related_artists_by_artist_id(token, artist_id):
 
     response = requests.get(url, headers=headers)
 
-    return response.json()  #["tracks"]
+    return response.json()  # ["tracks"]
+
 
 def main():
 
-    token = get_token()
-    artists = search_for_item(token, "sertanejo", 5)
+    pipeline = Spotify2Landing()
+    pipeline.start()
 
-    df = pd.DataFrame(artists)
-    df.to_json("data/landing/data.json", orient="records", index=False)
+    # token = get_token()
+    # artists = search_for_item(token, "sertanejo", 5)
 
-    rows = []
+    # df = pd.DataFrame(artists)
+    # df.to_json("data/landing/data.json", orient="records", index=False)
 
-    with open("data/landing/data.json", "r") as file:
-        json_data = json.load(file)
+    # rows = []
 
-    for data in json_data:
-        row = {
-            "id": data["id"],
-            "name": data["name"],
-            "popularity": data["popularity"],
-            "type": data["type"],
-            "uri": data["uri"],
-            "external_urls": data["external_urls"]["spotify"] if "external_urls" in data else None,
-            "total_followers": data["followers"]["total"] if 'followers' in data else None,
-            "genres": data["genres"] if "genres" in data else None,
-        }
+    # with open("data/landing/data.json", "r") as file:
+    #     json_data = json.load(file)
 
-        rows.append(row)
+    # for data in json_data:
+    #     row = {
+    #         "id": data["id"],
+    #         "name": data["name"],
+    #         "popularity": data["popularity"],
+    #         "type": data["type"],
+    #         "uri": data["uri"],
+    #         "external_urls": (
+    #             data["external_urls"]["spotify"]
+    #             if "external_urls" in data
+    #             else None
+    #         ),
+    #         "total_followers": (
+    #             data["followers"]["total"] if "followers" in data else None
+    #         ),
+    #         "genres": data["genres"] if "genres" in data else None,
+    #     }
 
-    df = pd.DataFrame(rows)
-    print(df.head())
-    print(df.info())
+    #     rows.append(row)
 
-    # for i, song in enumerate(songs):
-    #     print(f"{i + 1}. {song["name"]}")
-
-    # 2LweFzHQTdOl0LSqwOS5uM
+    # df = pd.DataFrame(rows)
+    # print(df.head())
+    # print(df.info())
 
 
-if __name__== "__main__":
+if __name__ == "__main__":
     main()

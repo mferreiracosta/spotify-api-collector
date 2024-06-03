@@ -37,7 +37,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
 profile = "black"
-know_third_party = []
+
 
 [tool.black]
 line-length = 79
