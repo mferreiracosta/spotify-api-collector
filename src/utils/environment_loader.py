@@ -29,6 +29,6 @@ class EnvLoader:
         """Método para buscar o client_secret do spotify."""
         return os.getenv("CLIENT_SECRET")
 
-    def get_to_landing_path(self) -> str:
+    def get_landing_path(self) -> str:
         """Método para buscar o caminho para salvar os dados na landing."""
-        return os.getenv("TO_LADING_PATH")
+        return os.getenv("LADING_PATH")
