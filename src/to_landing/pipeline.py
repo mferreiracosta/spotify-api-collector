@@ -11,7 +11,7 @@ class Spotify2Landing:
 
     def __init__(self):
         env_loader = EnvLoader()
-        self.landing_path = env_loader.get_to_landing_path
+        self.landing_path = env_loader.get_landing_path()
 
     def start(self):
         # Realiza as requisições de todos métodos da classe Extract
